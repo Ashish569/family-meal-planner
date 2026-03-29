@@ -1,0 +1,27 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# GitHub Actions: runs every Monday at 6:00 AM IST (12:30 AM UTC)
+# Just triggers a no-op commit so Streamlit Cloud picks up the new week.
+# The app itself uses datetime.now().isocalendar() — so no file changes needed.
+# ──────────────────────────────────────────────────────────────────────────────
+name: Weekly Meal Plan Refresh
+
+on:
+  schedule:
+    - cron: "30 0 * * 1"   # Every Monday 12:30 AM UTC = 6:00 AM IST
+  workflow_dispatch:         # Also allows manual trigger
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Update week stamp
+        run: |
+          echo "Last refreshed: $(date -u)" > last_refresh.txt
+
+      - name: Commit & push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: weekly meal plan auto-refresh"
+          file_pattern: last_refresh.txt
